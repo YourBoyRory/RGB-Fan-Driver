@@ -212,7 +212,7 @@ ramCLRMode=$(setCBValue "direct!static!rainbow!visor!rain!marquee!sequential!rai
     
     #draw UI
     (
-        yad --notebook --window-icon=configure --key=$plug --width=600 --title="$userName: $(hostname) Config"\
+        yad --notebook --window-icon=color-management --key=$plug --width=600 --title="$userName: $(hostname) Config"\
         --tab="Case"\
         --tab="AIO"\
         --tab="RAM"\
