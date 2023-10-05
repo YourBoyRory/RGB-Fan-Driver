@@ -170,7 +170,7 @@ ramCLRMode=$(setCBValue "direct!static!rainbow!visor!rain!marquee!sequential!rai
     (
         yad --form --separator=" " --plug=$plug --tabnum=2\
         --field="<b>LOGO LED Options</b>":LBL ""\
-      q  --field="LED Color Mode":CB $aioCLRMode \
+        --field="LED Color Mode":CB $aioCLRMode \
         --field="LED Primary Color":CLR "$aioPrimaryCLR"\
         --field="LED Secondary Color":CLR "$aioSecondaryCLR"\
         --field="<b>Pump Control</b>":LBL ""\
