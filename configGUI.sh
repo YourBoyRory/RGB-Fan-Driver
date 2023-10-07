@@ -120,11 +120,11 @@ readConfig
 # Fix Case Var
 caseCLRMode=$(setCBValue "fixed!spectrum-wave!alternating!pulse!breathing!candle!starry-night!wings!off" "$caseCLRMode")
 caseCLRSpeed=$(setCBValue "slowest!slower!normal!faster!fastest" "$caseCLRSpeed")
-caseTempProbe=$(setCBValue "cpu!gpu" "$caseTempProbe")
+caseTempProbe=$(setCBValue "CPU!GPU" "$caseTempProbe")
 
 # Fix AIO Var
 aioCLRMode=$(setCBValue "fixed!fading!blinking!blackout" "$aioCLRMode")
-aioTempProbe=$(setCBValue "cpu!coolant" "$aioTempProbe")
+aioTempProbe=$(setCBValue "Coolant" "$aioTempProbe")
 
 # Fix Ram Var
 ramCLRMode=$(setCBValue "direct!static!rainbow!visor!rain!marquee!sequential!rainbow-wave!color-shift!color-pulse!" "$ramCLRMode")

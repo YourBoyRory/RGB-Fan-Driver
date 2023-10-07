@@ -46,6 +46,14 @@ readConfig() {
     ramLEDBrightness=$(grep -oP '^ramLEDBrightness=\K.*' $ramCfg | head -n1 )
 }
 
+getCaseTemp() {
+    if [[ "$caseTempProbe" == "GPU" ]] ;then
+        echo $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader)
+    else
+        echo $(($(cat /sys/class/thermal/thermal_zone2/temp)/1000))
+    fi
+}
+
 readConfig
 
 if [[ $1 == "-h" ]]; then
@@ -121,84 +129,86 @@ icon70="power-profile-performance-symbolic"
 icon80="power-profile-performance-symbolic"
 icon90="power-profile-performance-symbolic"
 while true; do
-    if [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -lt 30 ]]; then
+    currTemp=$(getCaseTemp)
+
+    if [[ $currTemp -lt 30 ]]; then
         if [[ $lastPowerState -ne 20 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed20
-            echo "[INFO] GPU Temp 20c: Fan Speed $caseSpeed20"
+            echo "[INFO] $caseTempProbe Temp 20c: Fan Speed $caseSpeed20"
             lastPowerState=20
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon20" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 20c" "Fan Speed $caseSpeed20")
+                notifyID=$(notify-send -p --icon="$icon20" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 20c" "Fan Speed $caseSpeed20")
             fi
         fi
-    elif [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -lt 40 ]]; then
+    elif [[ $currTemp -lt 40 ]]; then
         if [[ $lastPowerState -ne 30 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed30
-            echo "[INFO] GPU Temp 30c: Fan Speed $caseSpeed30"
+            echo "[INFO] $caseTempProbe Temp 30c: Fan Speed $caseSpeed30"
             lastPowerState=30
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon30" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 30c" "Fan Speed $caseSpeed30")
+                notifyID=$(notify-send -p --icon="$icon30" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 30c" "Fan Speed $caseSpeed30")
             fi
         fi
-    elif [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -lt 50 ]]; then
+    elif [[ $currTemp -lt 50 ]]; then
         if [[ $lastPowerState -ne 40 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed40
-            echo "[INFO] GPU Temp 40c: Fan Speed $caseSpeed40"
+            echo "[INFO] $caseTempProbe Temp 40c: Fan Speed $caseSpeed40"
             lastPowerState=40
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon40" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 40c" "Fan Speed $caseSpeed40")
+                notifyID=$(notify-send -p --icon="$icon40" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 40c" "Fan Speed $caseSpeed40")
             fi
         fi
-    elif [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -lt 60 ]]; then
+    elif [[ $currTemp -lt 60 ]]; then
         if [[ $lastPowerState -ne 50 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed50
-            echo "[INFO] GPU Temp 50c: Fan Speed $caseSpeed50"
+            echo "[INFO] $caseTempProbe Temp 50c: Fan Speed $caseSpeed50"
             lastPowerState=50
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon50" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 50c" "Fan Speed $caseSpeed50")
+                notifyID=$(notify-send -p --icon="$icon50" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 50c" "Fan Speed $caseSpeed50")
             fi
         fi
-    elif [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -lt 70 ]]; then
+    elif [[ $currTemp -lt 70 ]]; then
         if [[ $lastPowerState -ne 60 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed60
-            echo "[INFO] GPU Temp 60c: Fan Speed $caseSpeed60"
+            echo "[INFO] $caseTempProbe Temp 60c: Fan Speed $caseSpeed60"
             lastPowerState=60
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon60" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 60c" "Fan Speed $caseSpeed60")
+                notifyID=$(notify-send -p --icon="$icon60" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 60c" "Fan Speed $caseSpeed60")
             fi
         fi
-    elif [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -lt 80 ]]; then
+    elif [[ $currTemp -lt 80 ]]; then
         if [[ $lastPowerState -ne 70 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed70
-            echo "[INFO] GPU Temp 70c: Fan Speed $caseSpeed70"
+            echo "[INFO] $caseTempProbe Temp 70c: Fan Speed $caseSpeed70"
             lastPowerState=70
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon70" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 70c" "Fan Speed $caseSpeed70")
+                notifyID=$(notify-send -p --icon="$icon70" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 70c" "Fan Speed $caseSpeed70")
             fi
         fi
-    elif [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -lt 90 ]]; then
+    elif [[ $currTemp -lt 90 ]]; then
         if [[ $lastPowerState -ne 80 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed80
-            echo "[INFO] GPU Temp 80c: Fan Speed $caseSpeed80"
+            echo "[INFO] $caseTempProbe Temp 80c: Fan Speed $caseSpeed80"
             lastPowerState=80
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon80" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 80c" "Fan Speed $caseSpeed80")
+                notifyID=$(notify-send -p --icon="$icon80" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 80c" "Fan Speed $caseSpeed80")
             fi
         fi
-    elif [[ $(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader) -gt 89 ]]; then
+    elif [[ $currTemp -gt 89 ]]; then
         if [[ $lastPowerState -ne 90 ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed90
-            echo "[INFO] GPU High Power state: Fan Speed 100"
+            echo "[INFO] $caseTempProbe Temp 90c: Fan Speed 100"
             lastPowerState=90
             if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon90" --replace-id=$notifyID --urgency=low  --app-name= "GPU Temp 90c" "Fan Speed $caseSpeed90")
+                notifyID=$(notify-send -p --icon="$icon90" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 90c" "Fan Speed $caseSpeed90")
             fi
         fi
     else
-        if [[ $lastPowerState -ne 90 ]]; then
+        if [[ "$lastPowerState" != "nan" ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed90
             echo "[WARN] Cannot communicate with nvidia driver, defaulting to high power state"
-            notify-send -p --urgency=critical  --app-name= "Fan controller defaulting to highest fan speed" "Script cannot communicate with nvidia driver"
-            lastPowerState=90
+            notify-send -p --urgency=critical  --app-name= "Fan controller defaulting to highest fan speed" "Script cannot communicate with $caseTempProbe driver"
+            lastPowerState="nan"
         fi
     fi
     sleep 5
