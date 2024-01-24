@@ -120,96 +120,94 @@ done
 # Fan
 notifyID=0
 lastPowerState=0
-icon20="power-profile-power-saver-symbolic"
-icon30="power-profile-power-saver-symbolic"
-icon40="power-profile-power-saver-symbolic"
-icon50="power-profile-balanced-symbolic"
-icon60="power-profile-balanced-symbolic"
-icon70="power-profile-performance-symbolic"
-icon80="power-profile-performance-symbolic"
-icon90="power-profile-performance-symbolic"
-while true; do
-    currTemp=$(getCaseTemp)
 
+getSpeed() {
+    case $1 in
+        20)
+            echo $caseSpeed20;;
+        30)
+            echo $caseSpeed30;;
+        40)
+            echo $caseSpeed40;;
+        50)
+            echo $caseSpeed50;;
+        60)
+            echo $caseSpeed60;;
+        70)
+            echo $caseSpeed70;;
+        80)
+            echo $caseSpeed80;;
+        90)
+            echo $caseSpeed90;;
+    esac  
+}
+
+getIcon() {
+    case $1 in
+        20)
+            echo "power-profile-power-saver-symbolic";;
+        30)
+            echo "power-profile-power-saver-symbolic";;
+        40)
+            echo "power-profile-power-saver-symbolic";;
+        50)
+            echo "power-profile-balanced-symbolic";;
+        60)
+            echo "power-profile-balanced-symbolic";;
+        70)
+            echo "power-profile-performance-symbolic";;
+        80)
+            echo "power-profile-performance-symbolic";;
+        90)
+            echo "power-profile-performance-symbolic";;
+    esac  
+}
+
+normalizeTemp() {
     if [[ $currTemp -lt 30 ]]; then
-        if [[ $lastPowerState -ne 20 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed20
-            echo "[INFO] $caseTempProbe Temp 20c: Fan Speed $caseSpeed20"
-            lastPowerState=20
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon20" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 20c" "Fan Speed $caseSpeed20")
-            fi
-        fi
+        echo "20"
     elif [[ $currTemp -lt 40 ]]; then
-        if [[ $lastPowerState -ne 30 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed30
-            echo "[INFO] $caseTempProbe Temp 30c: Fan Speed $caseSpeed30"
-            lastPowerState=30
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon30" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 30c" "Fan Speed $caseSpeed30")
-            fi
-        fi
+        echo "30"
     elif [[ $currTemp -lt 50 ]]; then
-        if [[ $lastPowerState -ne 40 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed40
-            echo "[INFO] $caseTempProbe Temp 40c: Fan Speed $caseSpeed40"
-            lastPowerState=40
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon40" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 40c" "Fan Speed $caseSpeed40")
-            fi
-        fi
+        echo "40"
     elif [[ $currTemp -lt 60 ]]; then
-        if [[ $lastPowerState -ne 50 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed50
-            echo "[INFO] $caseTempProbe Temp 50c: Fan Speed $caseSpeed50"
-            lastPowerState=50
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon50" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 50c" "Fan Speed $caseSpeed50")
-            fi
-        fi
+        echo "50"
     elif [[ $currTemp -lt 70 ]]; then
-        if [[ $lastPowerState -ne 60 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed60
-            echo "[INFO] $caseTempProbe Temp 60c: Fan Speed $caseSpeed60"
-            lastPowerState=60
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon60" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 60c" "Fan Speed $caseSpeed60")
-            fi
-        fi
+        echo "60"
     elif [[ $currTemp -lt 80 ]]; then
-        if [[ $lastPowerState -ne 70 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed70
-            echo "[INFO] $caseTempProbe Temp 70c: Fan Speed $caseSpeed70"
-            lastPowerState=70
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon70" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 70c" "Fan Speed $caseSpeed70")
-            fi
-        fi
+        echo "70"
     elif [[ $currTemp -lt 90 ]]; then
-        if [[ $lastPowerState -ne 80 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed80
-            echo "[INFO] $caseTempProbe Temp 80c: Fan Speed $caseSpeed80"
-            lastPowerState=80
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon80" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 80c" "Fan Speed $caseSpeed80")
-            fi
-        fi
+        echo "80"
     elif [[ $currTemp -gt 89 ]]; then
-        if [[ $lastPowerState -ne 90 ]]; then
-            liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed90
-            echo "[INFO] $caseTempProbe Temp 90c: Fan Speed 100"
-            lastPowerState=90
-            if [[ $caseSpeedNotify == "TRUE" ]]; then
-                notifyID=$(notify-send -p --icon="$icon90" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp 90c" "Fan Speed $caseSpeed90")
-            fi
-        fi
+        echo "90"
     else
+        echo "nan"
+    fi
+}
+
+setTemp() {
+    if [[ $lastPowerState -ne $1 ]]; then
+        liquidctl --match "NZXT Smart Device" set sync speed $(getSpeed $1)
+        echo "[INFO] $caseTempProbe Temp $1c: Fan Speed $(getSpeed $1)"
+        lastPowerState=$1
+        if [[ $caseSpeedNotify == "TRUE" ]]; then
+            notifyID=$(notify-send -p --icon="$(getIcon $1)" --replace-id=$notifyID --urgency=low  --app-name= "$caseTempProbe Temp $1c" "Fan Speed $(getSpeed $1)")
+        fi
+    fi
+}
+
+while true; do
+    currTemp=$(normalizeTemp $(getCaseTemp))
+
+    if [[ "$currTemp" == "nan" ]]; then
         if [[ "$lastPowerState" != "nan" ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed90
             echo "[WARN] Cannot communicate with nvidia driver, defaulting to high power state"
             notify-send -p --urgency=critical  --app-name= "Fan controller defaulting to highest fan speed" "Script cannot communicate with $caseTempProbe driver"
             lastPowerState="nan"
         fi
+    else 
+        setTemp $(currTemp)
     fi
     sleep 5
 done
