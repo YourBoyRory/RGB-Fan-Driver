@@ -29,7 +29,7 @@ setCBValue() {
         echo
     else
         output=$options
-    fi 
+    fi
     echo $output
 }
 
@@ -51,7 +51,7 @@ readConfig() {
     caseSpeed70=$(grep -oP '^caseSpeed70=\K.*' $caseCfg | head -n1 )
     caseSpeed80=$(grep -oP '^caseSpeed80=\K.*' $caseCfg | head -n1 )
     caseSpeed90=$(grep -oP '^caseSpeed90=\K.*' $caseCfg | head -n1 )
-    
+
     # AIO Var
     aioCLRMode=$(grep -oP '^aioCLRMode=\K.*' $aioCfg | head -n1 )
     aioPrimaryCLR=$(grep -oP '^aioPrimaryCLR=\K.*' $aioCfg | head -n1 )
@@ -74,7 +74,7 @@ readConfig() {
 }
 
 writeConfig() {
-    
+
     # Case Key/Value
     cat $caseTmp | awk '{ print "caseCLRMode="$1 }' > $caseCfg
     cat $caseTmp | awk '{ print "caseCLRSpeed="$2 }' >> $caseCfg
@@ -92,7 +92,7 @@ writeConfig() {
     cat $caseTmp | awk '{ print "caseSpeed70="$14 }' >> $caseCfg
     cat $caseTmp | awk '{ print "caseSpeed80="$15 }' >> $caseCfg
     cat $caseTmp | awk '{ print "caseSpeed90="$16 }'  >> $caseCfg
-    
+
     # AIO Key/Value
     cat $aioTmp | awk '{ print "aioCLRMode="$1 }' > $aioCfg
     cat $aioTmp | awk '{ print "aioPrimaryCLR="$2 }' >> $aioCfg
@@ -105,14 +105,14 @@ writeConfig() {
     cat $aioTmp | awk '{ print "aioSpeed60="$9 }' >> $aioCfg
     cat $aioTmp | awk '{ print "aioSpeed72="$10 }' >> $aioCfg
     cat $aioTmp | awk '{ print "aioSpeed84="$11 }' >> $aioCfg
-    
+
     # Ram Key/Value
     cat $ramTmp | awk '{ print "disableRamOnSleep="$1 }' > $ramCfg
     cat $ramTmp | awk '{ print "ramCLRMode="$2 }' >> $ramCfg
     cat $ramTmp | awk '{ print "ramLEDBrightness="$3 }' >> $ramCfg
     cat $ramTmp | awk '{ print "ramPrimaryCLR="$4 }' >> $ramCfg
     cat $ramTmp | awk '{ print "ramSecondaryCLR="$5 }' >> $ramCfg
-    
+
 }
 
 readConfig
@@ -127,8 +127,8 @@ aioCLRMode=$(setCBValue "fixed!fading!blinking!blackout" "$aioCLRMode")
 aioTempProbe=$(setCBValue "Coolant" "$aioTempProbe")
 
 # Fix Ram Var
-ramCLRMode=$(setCBValue "direct!static!rainbow!visor!rain!marquee!sequential!rainbow-wave!color-shift!color-pulse!" "$ramCLRMode")
-    
+ramCLRMode=$(setCBValue "direct!static!rainbow!rainbow-synced!visor!rain!marquee!sequential!rainbow-wave!color-shift!color-pulse!" "$ramCLRMode")
+
     # Case
     (
         yad --form --separator=" " --plug=$plug --tabnum=1\
@@ -209,7 +209,7 @@ ramCLRMode=$(setCBValue "direct!static!rainbow!visor!rain!marquee!sequential!rai
             | tee rgbAddrRGB.cfg'" \
         >$ramTmp
     )&\
-    
+
     #draw UI
     (
         yad --notebook --window-icon=color-management --key=$plug --width=600 --title="$userName: $(hostname) Config"\
@@ -221,7 +221,7 @@ ramCLRMode=$(setCBValue "direct!static!rainbow!visor!rain!marquee!sequential!rai
         --button="Cancel"!!"Doesn't Save anything and exit.":1\
     )
     exitCode=$?
-    
+
 if [[ $exitCode -eq 0 ]] ; then
     writeConfig
 elif [[ $exitCode -eq 2 ]] ; then

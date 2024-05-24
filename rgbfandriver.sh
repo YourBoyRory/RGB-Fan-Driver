@@ -24,7 +24,7 @@ readConfig() {
     caseSpeed70=$(grep -oP '^caseSpeed70=\K.*' $caseCfg | head -n1 )
     caseSpeed80=$(grep -oP '^caseSpeed80=\K.*' $caseCfg | head -n1 )
     caseSpeed90=$(grep -oP '^caseSpeed90=\K.*' $caseCfg | head -n1 )
-    
+
     # AIO Var
     aioCLRMode=$(grep -oP '^aioCLRMode=\K.*' $aioCfg | head -n1 )
     aioPrimaryCLR=$(grep -oP '^aioPrimaryCLR=\K.*' $aioCfg | head -n1 )
@@ -73,8 +73,8 @@ liquidctl --match "Corsair Hydro H100i" set led color $aioCLRMode "$aioPrimaryCL
 liquidctl --match "Corsair Hydro H100i" set pump speed $aioPumpSpeed
 if liquidctl --match "Corsair Hydro H100i" set fan speed 24 $aioSpeed24 36 $aioSpeed36 48 $aioSpeed48 60 $aioSpeed60 72 $aioSpeed72 84 $aioSpeed84 ; then
     echo " "
-    echo "=============================="  
-    echo "Temp Probe Set To: $aioTempProbe" 
+    echo "=============================="
+    echo "Temp Probe Set To: $aioTempProbe"
     echo "=============================="
     echo "Set AIO fan speed table"
     echo "24c | $aioSpeed24% RPM"
@@ -92,12 +92,12 @@ else
     notify-send --urgency=critical  --app-name= "Script cannot communicate with AIO" "unexpected OS error: USBError(16, 'Resource busy')"
 fi
 
-# Case 
+# Case
 liquidctl --match "NZXT Smart Device" set led color $caseCLRMode "$casePrimaryCLR" "$caseSecondaryCLR" "$caseTertiaryCLR" "$caseQuaternaryCLR" --speed $caseCLRSpeed
 
     echo " "
-    echo "=============================="  
-    echo "Temp Probe Set To: $caseTempProbe" 
+    echo "=============================="
+    echo "Temp Probe Set To: $caseTempProbe"
     echo "=============================="
     echo "Set Case fan speed table"
     echo "20c | $caseSpeed20% RPM"
@@ -112,10 +112,14 @@ liquidctl --match "NZXT Smart Device" set led color $caseCLRMode "$casePrimaryCL
     echo " "
 
 # RAM
-echo "[INFO] Spinning off RAM RGB workers..."
-for i in {0..3}; do
-	openrgb -d $i -m $ramCLRMode -c ${ramPrimaryCLR:1} -b $ramLEDBrightness --noautoconnect &
-done
+if [[ "$ramCLRMode" == "rainbow-sync" ]]; then
+    python /opt/rgbFanDriver/rainbow-sync.py
+else
+    echo "[INFO] Spinning off RAM RGB workers..."
+    for i in {0..3}; do
+        openrgb -d $i -m $ramCLRMode -c ${ramPrimaryCLR:1} -b $ramLEDBrightness --noautoconnect &
+    done
+fi
 
 # Fan
 notifyID=0
@@ -139,7 +143,7 @@ getSpeed() {
             echo $caseSpeed80;;
         90)
             echo $caseSpeed90;;
-    esac  
+    esac
 }
 
 getIcon() {
@@ -160,7 +164,7 @@ getIcon() {
             echo "power-profile-performance-symbolic";;
         90)
             echo "power-profile-performance-symbolic";;
-    esac  
+    esac
 }
 
 normalizeTemp() {
@@ -206,7 +210,7 @@ while true; do
             notify-send -p --urgency=critical  --app-name= "Fan controller defaulting to highest fan speed" "Script cannot communicate with $caseTempProbe driver"
             lastPowerState="nan"
         fi
-    else 
+    else
         setTemp $(currTemp)
     fi
     sleep 5
