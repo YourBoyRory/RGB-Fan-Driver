@@ -112,8 +112,8 @@ liquidctl --match "NZXT Smart Device" set led color $caseCLRMode "$casePrimaryCL
     echo " "
 
 # RAM
-if [[ "$ramCLRMode" == "rainbow-sync" ]]; then
-    python /opt/rgbFanDriver/rainbow-sync.py
+if [[ "$ramCLRMode" == "rainbow-synced" ]]; then
+    python /opt/rgbfandriver/rainbow-sync.py &
 else
     echo "[INFO] Spinning off RAM RGB workers..."
     for i in {0..3}; do
@@ -211,7 +211,7 @@ while true; do
             lastPowerState="nan"
         fi
     else
-        setTemp $(currTemp)
+        setTemp $currTemp
     fi
     sleep 5
 done

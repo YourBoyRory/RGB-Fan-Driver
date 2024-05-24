@@ -226,6 +226,7 @@ if [[ $exitCode -eq 0 ]] ; then
     writeConfig
 elif [[ $exitCode -eq 2 ]] ; then
     killall -9 rgbfandriver
+    kill $(ps aux | grep "rainbow-sync.py" | grep -v 'grep' | awk '{print $2}')
     writeConfig
     (
         rgbfandriver -q
