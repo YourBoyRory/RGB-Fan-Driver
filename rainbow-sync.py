@@ -6,6 +6,10 @@ from threading import Thread
 from openrgb import OpenRGBClient
 from openrgb.utils import RGBColor, DeviceType
 
+clients = OpenRGBClient()
+RAM = clients.get_devices_by_type(DeviceType.DRAM)
+AIO = clients.get_devices_by_type(DeviceType.COOLER)
+
 # Wave and Color Settings
 color_brightness=80 # 0-255
 color_desaturation=0 # 0-255
@@ -31,13 +35,11 @@ def setAIOColor(dev, dispColors):
     AIO[dev].set_color(dispColors[4], True)
 
 def spawnWorkers(colors):
-    workers = [
-        #Thread(target=setAIOColor, args=(0, colors)),
-        Thread(target=setRamColor, args=(0, colors)),
-        Thread(target=setRamColor, args=(1, colors)),
-        Thread(target=setRamColor, args=(2, colors)),
-        Thread(target=setRamColor, args=(3, colors)),
-    ]
+    workers = [None] * len(RAM)
+    count=0
+    for w in workers
+        w = Thread(target=setRamColor, args=(count, colors)),
+        count=count+1
     for w in workers:
         w.start()
     time.sleep(effect_slowness)
@@ -70,10 +72,8 @@ def generateColor(lookAhead,color):
 
 def rainbow(colors):
     oldColor=colors[0]
-    count = 0
-    while count < len(colors):
-        colors[count] = generateColor(count,oldColor)
-        count=count+1
+    for led in colors:
+        led = generateColor(count,oldColor)
     spawnWorkers(colors)
     return colors
 
@@ -81,10 +81,6 @@ def rainbow(colors):
 def dark():
     for module in RAM:
         module.clear()
-
-clients = OpenRGBClient()
-RAM = clients.get_devices_by_type(DeviceType.DRAM)
-AIO = clients.get_devices_by_type(DeviceType.COOLER)
 
 # Starting Values
 currentColors = [None] * len(RAM[0].leds)
