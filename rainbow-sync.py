@@ -41,7 +41,7 @@ def setAIOColor(dev, dispColors):
 
 def spawnWorkers(colors):
     workers = [
-        Thread(target=setAIOColor, args=(0, colors)),
+        #Thread(target=setAIOColor, args=(0, colors)),
         Thread(target=setRamColor, args=(0, colors)),
         Thread(target=setRamColor, args=(1, colors)),
         Thread(target=setRamColor, args=(2, colors)),

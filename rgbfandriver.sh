@@ -69,6 +69,7 @@ if [[ $1 != "-q" ]]; then
 fi
 
 # Water Cooler
+liquidctl --match "Corsair Hydro H100i" set led color $aioCLRMode "$aioPrimaryCLR" "$caseSecondaryCLR"
 liquidctl --match "Corsair Hydro H100i" set pump speed $aioPumpSpeed
 if liquidctl --match "Corsair Hydro H100i" set fan speed 24 $aioSpeed24 36 $aioSpeed36 48 $aioSpeed48 60 $aioSpeed60 72 $aioSpeed72 84 $aioSpeed84 ; then
     echo " "
