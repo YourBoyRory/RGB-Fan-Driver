@@ -6,6 +6,9 @@ from threading import Thread
 from openrgb import OpenRGBClient
 from openrgb.utils import RGBColor, DeviceType
 
+clients = OpenRGBClient()
+RAM = clients.get_devices_by_type(DeviceType.DRAM)
+
 # Wave and Color Settings
 color_brightness=80 # 0-255
 color_desaturation=0 # 0-255
@@ -27,17 +30,10 @@ def setRamColor(dev, dispColors):
     RAM[dev].colors = dispColors
     RAM[dev].show(True);
 
-def setAIOColor(dev, dispColors):
-    AIO[dev].set_color(dispColors[4], True)
-
 def spawnWorkers(colors):
-    workers = [
-        #Thread(target=setAIOColor, args=(0, colors)),
-        Thread(target=setRamColor, args=(0, colors)),
-        Thread(target=setRamColor, args=(1, colors)),
-        Thread(target=setRamColor, args=(2, colors)),
-        Thread(target=setRamColor, args=(3, colors)),
-    ]
+    workers = [None] * len(RAM)
+    for i in range(len(workers)):
+        workers[i] = Thread(target=setRamColor, args=(i, colors))
     for w in workers:
         w.start()
     time.sleep(effect_slowness)
@@ -45,11 +41,10 @@ def spawnWorkers(colors):
         w.join()
 
 def generateColor(lookAhead,color):
-    count=(wave_frequency*lookAhead)
     red=color.red
     green=color.green
     blue=color.blue
-    while count > -1:
+    for i in range(int(wave_frequency*lookAhead),-1,-1):
         if green >= color_brightness and blue < color_brightness:
             if red > color_desaturation:
                 red=red-effect_smoothness
@@ -65,15 +60,12 @@ def generateColor(lookAhead,color):
                 blue=blue-effect_smoothness
             else:
                 green=green+effect_smoothness
-        count=count-1
     return RGBColor(limit(red),limit(green),limit(blue))
 
 def rainbow(colors):
     oldColor=colors[0]
-    count = 0
-    while count < len(colors):
-        colors[count] = generateColor(count,oldColor)
-        count=count+1
+    for i in range(len(colors)):
+        colors[i] = generateColor(i,oldColor)
     spawnWorkers(colors)
     return colors
 
@@ -81,10 +73,6 @@ def rainbow(colors):
 def dark():
     for module in RAM:
         module.clear()
-
-clients = OpenRGBClient()
-RAM = clients.get_devices_by_type(DeviceType.DRAM)
-AIO = clients.get_devices_by_type(DeviceType.COOLER)
 
 # Starting Values
 currentColors = [None] * len(RAM[0].leds)
@@ -102,6 +90,4 @@ while True:
         dark()
     else:
         currentColors = rainbow(currentColors)
-        #print(f"\rTest\033[0m ", end='', flush=True)
         print(f"\r\033[31mR:{currentColors[0].red:3d} \033[92mG:{currentColors[0].green:3d} \033[34mB:{currentColors[0].blue:3d} \033[36m(#{currentColors[0].red:02x}{currentColors[0].green:02x}{currentColors[0].blue:02x})\033[0m ", end='', flush=True)
-
