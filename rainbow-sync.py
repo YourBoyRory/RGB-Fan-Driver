@@ -32,10 +32,8 @@ def setRamColor(dev, dispColors):
 
 def spawnWorkers(colors):
     workers = [None] * len(RAM)
-    count=0
-    for w in workers
-        w = Thread(target=setRamColor, args=(count, colors)),
-        count=count+1
+    for i in range(len(workers)):
+        workers[i] = Thread(target=setRamColor, args=(i, colors))
     for w in workers:
         w.start()
     time.sleep(effect_slowness)
@@ -43,11 +41,10 @@ def spawnWorkers(colors):
         w.join()
 
 def generateColor(lookAhead,color):
-    count=(wave_frequency*lookAhead)
     red=color.red
     green=color.green
     blue=color.blue
-    while count > -1:
+    for i in range(int(wave_frequency*lookAhead),-1,-1):
         if green >= color_brightness and blue < color_brightness:
             if red > color_desaturation:
                 red=red-effect_smoothness
@@ -63,13 +60,12 @@ def generateColor(lookAhead,color):
                 blue=blue-effect_smoothness
             else:
                 green=green+effect_smoothness
-        count=count-1
     return RGBColor(limit(red),limit(green),limit(blue))
 
 def rainbow(colors):
     oldColor=colors[0]
-    for led in colors:
-        led = generateColor(count,oldColor)
+    for i in range(len(colors)):
+        colors[i] = generateColor(i,oldColor)
     spawnWorkers(colors)
     return colors
 
@@ -94,5 +90,4 @@ while True:
         dark()
     else:
         currentColors = rainbow(currentColors)
-        #print(f"\rTest\033[0m ", end='', flush=True)
         print(f"\r\033[31mR:{currentColors[0].red:3d} \033[92mG:{currentColors[0].green:3d} \033[34mB:{currentColors[0].blue:3d} \033[36m(#{currentColors[0].red:02x}{currentColors[0].green:02x}{currentColors[0].blue:02x})\033[0m ", end='', flush=True)
