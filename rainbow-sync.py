@@ -8,7 +8,6 @@ from openrgb.utils import RGBColor, DeviceType
 
 clients = OpenRGBClient()
 RAM = clients.get_devices_by_type(DeviceType.DRAM)
-AIO = clients.get_devices_by_type(DeviceType.COOLER)
 
 # Wave and Color Settings
 color_brightness=80 # 0-255
@@ -30,9 +29,6 @@ def limit(value):
 def setRamColor(dev, dispColors):
     RAM[dev].colors = dispColors
     RAM[dev].show(True);
-
-def setAIOColor(dev, dispColors):
-    AIO[dev].set_color(dispColors[4], True)
 
 def spawnWorkers(colors):
     workers = [None] * len(RAM)
@@ -100,4 +96,3 @@ while True:
         currentColors = rainbow(currentColors)
         #print(f"\rTest\033[0m ", end='', flush=True)
         print(f"\r\033[31mR:{currentColors[0].red:3d} \033[92mG:{currentColors[0].green:3d} \033[34mB:{currentColors[0].blue:3d} \033[36m(#{currentColors[0].red:02x}{currentColors[0].green:02x}{currentColors[0].blue:02x})\033[0m ", end='', flush=True)
-
