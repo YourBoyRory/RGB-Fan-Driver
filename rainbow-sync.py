@@ -10,7 +10,7 @@ clients = OpenRGBClient()
 RAM = clients.get_devices_by_type(DeviceType.DRAM)
 
 # Wave and Color Settings
-color_brightness=80 # 0-255
+color_brightness=255 # 0-255
 color_desaturation=0 # 0-255
 
 # Preset Values, Change only if you want to change effect speed
