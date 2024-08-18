@@ -168,21 +168,21 @@ getIcon() {
 }
 
 normalizeTemp() {
-    if [[ $currTemp -lt 30 ]]; then
+    if [[ $1 -lt 30 ]]; then
         echo "20"
-    elif [[ $currTemp -lt 40 ]]; then
+    elif [[ $1 -lt 40 ]]; then
         echo "30"
-    elif [[ $currTemp -lt 50 ]]; then
+    elif [[ $1 -lt 50 ]]; then
         echo "40"
-    elif [[ $currTemp -lt 60 ]]; then
+    elif [[ $1 -lt 60 ]]; then
         echo "50"
-    elif [[ $currTemp -lt 70 ]]; then
+    elif [[ $1 -lt 70 ]]; then
         echo "60"
-    elif [[ $currTemp -lt 80 ]]; then
+    elif [[ $1 -lt 80 ]]; then
         echo "70"
-    elif [[ $currTemp -lt 90 ]]; then
+    elif [[ $1 -lt 90 ]]; then
         echo "80"
-    elif [[ $currTemp -gt 89 ]]; then
+    elif [[ $1 -gt 89 ]]; then
         echo "90"
     else
         echo "nan"
@@ -202,7 +202,6 @@ setTemp() {
 
 while true; do
     currTemp=$(normalizeTemp $(getCaseTemp))
-
     if [[ "$currTemp" == "nan" ]]; then
         if [[ "$lastPowerState" != "nan" ]]; then
             liquidctl --match "NZXT Smart Device" set sync speed $caseSpeed90
