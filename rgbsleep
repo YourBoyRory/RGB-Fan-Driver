@@ -1,0 +1,15 @@
+#!/usr/bin/python
+
+import sys
+from openrgb import OpenRGBClient
+from openrgb.utils import DeviceType
+
+RAM = OpenRGBClient().get_devices_by_type(DeviceType.DRAM)
+
+if sys.argv[1] == "pre":
+    for module in RAM:
+        module.set_mode("Visor")
+elif sys.argv[1] == "post":
+    for module in RAM:
+        module.set_mode("direct")
+        
