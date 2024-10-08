@@ -1,6 +1,7 @@
 import psutil
 import subprocess
 import json
+import platform
 
 class HardwareTemp:
 
@@ -13,19 +14,38 @@ class HardwareTemp:
             self.gpuModel = "Intel"
         else:
             self.gpuModel = None
+        try:
+            temperatures = psutil.sensors_temperatures()
+            temp = temperatures['coretemp'][0][1]
+            self.cpuModel = "Intel"
+        except:
+            try:
+                temperatures = psutil.sensors_temperatures()
+                temp = temperatures['k10temp'][0][1]
+                self.cpuModel = "AMD"
+            except:
+                self.cpuModel = None
+        print(f"Platform established as {self.cpuModel} CPU with {self.gpuModel} GPU")
 
     def get_nvidia_gpu_temp(self):
         try:
-            result = subprocess.run(['nvidia-smi', '--query-gpu=temperature.gpu', '--format=csv,noheader,nounits'],
+            result = subprocess.run(['/usr/bin/nvidia-smi', '--query-gpu=temperature.gpu', '--format=csv,noheader,nounits'],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             temp = result.stdout.decode('utf-8').strip()
             return int(temp)
         except:
             return None
-
+            
     def get_amd_gpu_temp(self):
         try:
-            result = subprocess.run(['rocm-smi', '--showtemp'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            temperatures = psutil.sensors_temperatures()
+            return int(temperatures['amdgpu'][0][1])
+        except:
+            return get_amd_gpu_temp_old()
+
+    def get_amd_gpu_temp_old(self):
+        try:
+            result = subprocess.run(['/opt/rocm/bin/rocm-smi', '--showtemp'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             output = result.stdout.decode('utf-8')
             # Parse the output to find the temperature
             for line in output.splitlines():
@@ -69,6 +89,10 @@ class HardwareTemp:
     def get_cpu_temp(self):
         try:
             temperatures = psutil.sensors_temperatures()
-            return int(temperatures['coretemp'][0][1])
+            if self.cpuModel == "Intel":
+                temp = temperatures['coretemp'][0][1]
+            elif self.cpuModel == "AMD":
+                temp = temperatures['k10temp'][0][1]
+            return int(temp)
         except:
             return None

@@ -1,13 +1,15 @@
 from liquidctl.driver.smart_device import SmartDevice
 from liquidctl.driver.asetek import Hydro690Lc
 from HardwareTemps import HardwareTemp
-from desktop_notifier import DesktopNotifier
+from config import Config
+from PyQt5.QtWidgets import QMessageBox
+import subprocess
 import asyncio
 import time
+import json
 
 class FanDriverService:
 
-    notifier = DesktopNotifier()
     temps = HardwareTemp()
     smartHub = SmartDevice.find_supported_devices()[0]
     smartHub.connect()
@@ -18,6 +20,8 @@ class FanDriverService:
 
     lastProbe = None
     lastTemp = None
+    gpuTemp = None
+    cpuTemp = None
 
     def __init__(self, config):
         self.config = config
@@ -28,48 +32,51 @@ class FanDriverService:
     def initialize(self):
         while True:
             time.sleep(5)
-            temp, probe = self.getTemp()
+            temp = self.getTemp()
             if temp != self.lastTemp:
-                if temp == 255:
+                if temp == -256:
                     asyncio.run(self.sendNotification("Failed to comunicate with tempature probe!", f"The {probe} driver may not be initialize."))
-                    self.lastTemp = 255
+                    self.lastTemp = -256
                     temp = 90
                 else:
                     self.lastTemp = temp
                 speed = self.config['SmartHub']['Fan']['Curve'][str(temp)]
-                print(f"{probe} tempature changed to ~{temp}c, setting fan to {speed}%")
+                print(f"{self.lastProbe} tempature changed to ~{temp}c, setting fan to {speed}%")
                 self.setCaseFans(speed)
+            print(json.dumps(self.getData(), indent=2))
 
     def getTemp(self):
-        probe = self.config['SmartHub']['Fan']['Probe']
-        if probe == "GPU":
-            return self.pollGPU(), probe
-        if probe == "BOTH":
-            gpuTemp = self.pollGPU()
-            cpuTemp = self.pollCPU()
-            if gpuTemp > cpuTemp:
-                if self.lastProbe != "GPU":
-                    self.lastProbe = "GPU"
-                    print("GPU is hotter, using GPU probe")
-                return gpuTemp, "GPU"
+        self.lastProbe = self.config['SmartHub']['Fan']['Probe']
+        if self.lastProbe == "GPU":
+            temp = self.pollGPU()
+        elif self.lastProbe == "BOTH":
+            gpu = self.pollGPU()
+            cpu = self.pollCPU()
+            if self.gpuTemp == None or self.cpuTemp == None:
+                temp = None
+            elif self.gpuTemp > self.cpuTemp:
+                self.lastProbe = "GPU"
+                temp = gpu
             else:
-                if self.lastProbe != "CPU":
-                    self.lastProbe = "CPU"
-                    print("CPU is hotter, using CPU probe")
-                return cpuTemp, "CPU"
+                self.lastProbe = "CPU"
+                temp = cpu
         else:
-            return self.pollCPU(), probe
+            temp = self.pollCPU()
+        return self.normalizeTemp(temp)
 
     def pollGPU(self):
-        return self.normalizeTemp(self.temps.get_gpu_temp())
+        self.lastProbe = "GPU"
+        self.gpuTemp = self.temps.get_gpu_temp()
+        return self.normalizeTemp(self.gpuTemp)
 
     def pollCPU(self):
-        #return self.normalizeTemp(self.temps.get_cpu_usage())
-        return self.normalizeTemp(self.temps.get_cpu_temp())
+        self.lastProbe = "CPU"
+        self.cpuTemp = self.temps.get_cpu_temp()
+        return self.normalizeTemp(self.cpuTemp)
 
     def normalizeTemp(self, temp):
         if temp == None:
-            return 255
+            return -256
         elif temp < 20:
             return 20
         elif temp > 94:
@@ -78,8 +85,25 @@ class FanDriverService:
             return round(temp, -1)
             #return (temp // 10) * 10
 
+    def getData(self):
+        data = self.config
+        data['CPU'] = {}
+        data['GPU'] = {}
+        try:
+            data['Current Probe'] = self.lastProbe
+            data['Last State'] = self.lastTemp
+            data['Last Speed'] = self.config['SmartHub']['Fan']['Curve'][str(self.lastTemp)]
+            data['CPU']['Model'] = self.temps.cpuModel
+            data['CPU']['Temp'] = self.cpuTemp
+            data['GPU']['Model'] = self.temps.gpuModel
+            data['GPU']['Temp'] = self.gpuTemp
+        except:
+            pass
+        return data
+
     def setCaseFans(self, speed):
         self.smartHub.set_fixed_speed("sync", speed)
+        pass
 
     def setCaseLights(self):
         mode = self.config['SmartHub']['Light Strips']['ColorMode']
@@ -93,47 +117,10 @@ class FanDriverService:
         self.waterCooler.set_color("led", mode, color)
 
     async def sendNotification(self, title, message):
-        await self.notifier.send(
-            title=title,
-            message=message)
+        subprocess.run(['notify-send', "--urgency=critical", title, message])
 
-config = {
-    'SmartHub': {
-        'Light Strips': {
-            'ColorMode': 'spectrum-wave',
-            'Colors': [[0, 0, 0]],
-            'Speed': 'slowest'
-        },
-        'Fan': {
-            'Probe': 'BOTH',
-            'Curve': {
-                '20': 20,
-                '30': 20,
-                '40': 20,
-                '50': 20,
-                '60': 20,
-                '70': 100,
-                '80': 100,
-                '90': 100
-            }
-        }
-    },
-    'AIO': {
-        'Light': {
-            'ColorMode': 'fixed',
-            'Colors': [[255, 255, 255]]
-        },
-        'Fan Curve': {
-            '24': 20,
-            '36': 20,
-            '48': 33,
-            '60': 50,
-            '72': 70,
-            '84': 100
-        }
-    },
-}
-FanDriverService(config)
+config = Config()
+FanDriverService(config.config)
 
 
 
