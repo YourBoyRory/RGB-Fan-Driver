@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import traceback
 
-class Config:
+class ConfigLib:
 
     config_path = os.path.join(Path.home(), '.fan_config.json')
     config = {

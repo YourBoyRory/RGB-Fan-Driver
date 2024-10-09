@@ -1,16 +1,20 @@
+#!/usr/bin/python
+
+# Install
 from liquidctl.driver.smart_device import SmartDevice
 from liquidctl.driver.asetek import Hydro690Lc
-from HardwareTemps import HardwareTemp
-from config import Config
-from PyQt5.QtWidgets import QMessageBox
-import subprocess
-import asyncio
+import notify2
+
+# Provided
+from FanDriverHardwareLib import HardwareLib
+from FanDriverConfigLib import ConfigLib
+
 import time
 import json
 
 class FanDriverService:
 
-    temps = HardwareTemp()
+    hardwareControl = HardwareLib()
     smartHub = SmartDevice.find_supported_devices()[0]
     smartHub.connect()
     smartHub.initialize()
@@ -35,7 +39,7 @@ class FanDriverService:
             temp = self.getTemp()
             if temp != self.lastTemp:
                 if temp == -256:
-                    asyncio.run(self.sendNotification("Failed to comunicate with tempature probe!", f"The {probe} driver may not be initialize."))
+                    self.sendNotification("Failed to comunicate with tempature probe!", f"The {probe} driver may not be initialize.")
                     self.lastTemp = -256
                     temp = 90
                 else:
@@ -43,7 +47,7 @@ class FanDriverService:
                 speed = self.config['SmartHub']['Fan']['Curve'][str(temp)]
                 print(f"{self.lastProbe} tempature changed to ~{temp}c, setting fan to {speed}%")
                 self.setCaseFans(speed)
-            print(json.dumps(self.getData(), indent=2))
+            #print(json.dumps(self.getData(), indent=2))
 
     def getTemp(self):
         self.lastProbe = self.config['SmartHub']['Fan']['Probe']
@@ -66,12 +70,12 @@ class FanDriverService:
 
     def pollGPU(self):
         self.lastProbe = "GPU"
-        self.gpuTemp = self.temps.get_gpu_temp()
+        self.gpuTemp = self.hardwareControl.get_gpu_temp()
         return self.normalizeTemp(self.gpuTemp)
 
     def pollCPU(self):
         self.lastProbe = "CPU"
-        self.cpuTemp = self.temps.get_cpu_temp()
+        self.cpuTemp = self.hardwareControl.get_cpu_temp()
         return self.normalizeTemp(self.cpuTemp)
 
     def normalizeTemp(self, temp):
@@ -93,9 +97,9 @@ class FanDriverService:
             data['Current Probe'] = self.lastProbe
             data['Last State'] = self.lastTemp
             data['Last Speed'] = self.config['SmartHub']['Fan']['Curve'][str(self.lastTemp)]
-            data['CPU']['Model'] = self.temps.cpuModel
+            data['CPU']['Model'] = self.hardwareControl.cpuModel
             data['CPU']['Temp'] = self.cpuTemp
-            data['GPU']['Model'] = self.temps.gpuModel
+            data['GPU']['Model'] = self.hardwareControl.gpuModel
             data['GPU']['Temp'] = self.gpuTemp
         except:
             pass
@@ -116,11 +120,13 @@ class FanDriverService:
         color = self.config['AIO']['Light']['Colors']
         self.waterCooler.set_color("led", mode, color)
 
-    async def sendNotification(self, title, message):
-        subprocess.run(['notify-send', "--urgency=critical", title, message])
+    def sendNotification(self, title, message):
+        notify2.init('Fan Driver')
+        n = notify2.Notification(title, message, "notification-message-im")
+        n.show()
 
-config = Config()
-FanDriverService(config.config)
+configLib = ConfigLib()
+FanDriverService(configLib.config)
 
 
 

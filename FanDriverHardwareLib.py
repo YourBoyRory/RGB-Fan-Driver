@@ -3,7 +3,7 @@ import subprocess
 import json
 import platform
 
-class HardwareTemp:
+class HardwareLib:
 
     def __init__(self):
         if self.get_nvidia_gpu_temp():
@@ -35,15 +35,15 @@ class HardwareTemp:
             return int(temp)
         except:
             return None
-            
+
     def get_amd_gpu_temp(self):
         try:
             temperatures = psutil.sensors_temperatures()
             return int(temperatures['amdgpu'][0][1])
         except:
-            return get_amd_gpu_temp_old()
+            return get_amd_gpu_temp_backup()
 
-    def get_amd_gpu_temp_old(self):
+    def get_amd_gpu_temp_backup(self):
         try:
             result = subprocess.run(['/opt/rocm/bin/rocm-smi', '--showtemp'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             output = result.stdout.decode('utf-8')
@@ -52,6 +52,7 @@ class HardwareTemp:
                 if "Temperature" in line:
                     # Example output line: "Temperature: 45 C"
                     temp = int(line.split(":")[1].strip().split(" ")[0])
+                    print(f"Using AMD backup method")
                     return temp
         except:
             return None
