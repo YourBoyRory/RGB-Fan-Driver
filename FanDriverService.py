@@ -86,8 +86,8 @@ class FanDriverService:
         elif temp > 94:
             return 90
         else:
-            return round(temp, -1)
-            #return (temp // 10) * 10
+            #return round(temp, -1)
+            return (temp // 10) * 10
 
     def getData(self):
         data = self.config
