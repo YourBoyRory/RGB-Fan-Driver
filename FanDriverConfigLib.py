@@ -49,7 +49,7 @@ class ConfigLib:
     def load_config(self):
         try:
             with open(self.config_path) as f:
-                self.whitelist = json.load(f)
+                self.config = json.load(f)
         except:
             print("Could not load existing config")
             self.save_config()
