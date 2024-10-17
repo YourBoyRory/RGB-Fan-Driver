@@ -44,7 +44,7 @@ class FanDriverService:
                     temp = 90
                 else:
                     self.lastTemp = temp
-                speed = self.config['SmartHub']['Fan']['Curve'][str(temp)]
+                speed = self.config['SmartHub']['Fan'][f'{self.lastProbe} Curve'][str(temp)]
                 print(f"{self.lastProbe} tempature changed to ~{temp}c, setting fan to {speed}%")
                 self.setCaseFans(speed)
             #print(json.dumps(self.getData(), indent=2))
@@ -58,12 +58,12 @@ class FanDriverService:
             cpu = self.pollCPU()
             if self.gpuTemp == None or self.cpuTemp == None:
                 temp = None
-            elif self.gpuTemp > self.cpuTemp:
-                self.lastProbe = "GPU"
-                temp = gpu
-            else:
+            elif cpu > gpu:
                 self.lastProbe = "CPU"
                 temp = cpu
+            else:
+                self.lastProbe = "GPU"
+                temp = gpu
         else:
             temp = self.pollCPU()
         return self.normalizeTemp(temp)
@@ -86,8 +86,10 @@ class FanDriverService:
         elif temp > 94:
             return 90
         else:
-            return round(temp, -1)
-            return (temp // 10) * 10
+            if self.lastProbe == "CPU":
+                return round(temp, -1)
+            else:
+                return (temp // 10) * 10
 
     def getData(self):
         data = self.config
